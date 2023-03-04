@@ -65,29 +65,105 @@ def decrypt(ciphertext: bytes, key: bytes):
 
     return plaintext
 
-def cipherFunctionEncrypt(left, roundKey):
+def cipherFunctionEncrypt(byte, roundKey):
     playfairMap = fillPlayFairMatrix(roundKey)
 
-    bigrams = split64BitTo4BitBigrams(left)
+    bigrams = split64BitTo4BitBigrams(byte)
     ret = bytearray()
 
     for bigram in bigrams:
         first, second = playfairAlgorithmEncrypt(bigram, roundKey, playfairMap)
         ret.append((first << 4) | second)
 
-    return ret
+    shiftMatrix = generateMatrixFrom64Bit(ret)
+    permutateEncrypt(shiftMatrix, roundKey)
 
-def cipherFunctionDecrypt(left, roundKey):
+    return generate64BitFromMatrix(shiftMatrix)
+
+def cipherFunctionDecrypt(byte, roundKey):
     playfairMap = fillPlayFairMatrix(roundKey)
 
-    bigrams = split64BitTo4BitBigrams(left)
+    shiftMatrix = generateMatrixFrom64Bit(byte)
+    permutateDecrypt(shiftMatrix, roundKey)
+    byte = generate64BitFromMatrix(shiftMatrix)
+
+    bigrams = split64BitTo4BitBigrams(byte)
     ret = bytearray()
 
     for bigram in bigrams:
         first, second = playfairAlgorithmDecrypt(bigram, roundKey, playfairMap)
-        ret.append((first << 4) | second)
+        ret.append((first << 4) | second) 
 
     return ret
+
+def permutateEncrypt(matrix, roundKey):
+    roundKeyNumber = 0
+    for i in range(len(roundKey)):
+        for j in range(len(roundKey[0])):
+            if i % 2 == 0:
+                if j % 2 == 0:
+                    roundKeyNumber += roundKey[i][j]
+                else:
+                    roundKeyNumber -= roundKey[i][j]
+            else:
+                if j % 2 == 0:
+                    roundKeyNumber -= roundKey[i][j]
+                else:
+                    roundKeyNumber += roundKey[i][j]
+
+    if roundKeyNumber >= 0:
+        shiftRowsLikeAES(matrix, True)
+        shiftDiagonalDown(matrix)
+        clockwiseRotate(matrix)
+    else:
+        shiftDiagonalUp(matrix)
+        counterclockwiseRotate(matrix)
+        shiftRowsLikeAES(matrix, True)
+
+def permutateDecrypt(matrix, roundKey):
+    roundKeyNumber = 0
+    for i in range(len(roundKey)):
+        for j in range(len(roundKey[0])):
+            if i % 2 == 0:
+                if j % 2 == 0:
+                    roundKeyNumber += roundKey[i][j]
+                else:
+                    roundKeyNumber -= roundKey[i][j]
+            else:
+                if j % 2 == 0:
+                    roundKeyNumber -= roundKey[i][j]
+                else:
+                    roundKeyNumber += roundKey[i][j]
+
+    if roundKeyNumber >= 0:
+        counterclockwiseRotate(matrix)
+        shiftDiagonalUp(matrix)
+        shiftRowsLikeAES(matrix, False)
+    else:
+        shiftRowsLikeAES(matrix, False)
+        clockwiseRotate(matrix)
+        shiftDiagonalDown(matrix)
+
+def shiftRowsLikeAES(matrix, encrypt):
+    for i in range(1, 4):
+        if encrypt:
+            matrix[i][0], matrix[i][1], matrix[i][2], matrix[i][3] = matrix[i][(0 + i) % 4], matrix[i][(1 + i) % 4], matrix[i][(2 + i) % 4], matrix[i][(3 + i) % 4]
+        else:
+            matrix[i][(0 + i) % 4], matrix[i][(1 + i) % 4], matrix[i][(2 + i) % 4], matrix[i][(3 + i) % 4] = matrix[i][0], matrix[i][1], matrix[i][2], matrix[i][3]
+
+def clockwiseRotate(matrix):
+    matrix[0][1], matrix[0][2], matrix[1][3], matrix[2][3], matrix[3][1], matrix[3][2], matrix[1][0], matrix[2][0] = matrix[2][0], matrix[0][1], matrix[0][2], matrix[1][3], matrix[2][3], matrix[3][1], matrix[3][2], matrix[1][0]
+
+def counterclockwiseRotate(matrix):
+    matrix[0][1], matrix[0][2], matrix[1][3], matrix[2][3], matrix[3][1], matrix[3][2], matrix[1][0], matrix[2][0] = matrix[0][2], matrix[1][3], matrix[2][3], matrix[3][1], matrix[3][2], matrix[1][0], matrix[2][0], matrix[0][1]
+
+def shiftDiagonalDown(matrix):
+    matrix[0][0], matrix[1][1], matrix[2][2], matrix[3][3] = matrix[3][3], matrix[0][0], matrix[1][1], matrix[2][2]
+    matrix[0][3], matrix[1][2], matrix[2][1], matrix[3][0] = matrix[3][0], matrix[0][3], matrix[1][2], matrix[2][1]
+
+def shiftDiagonalUp(matrix):
+    matrix[0][0], matrix[1][1], matrix[2][2], matrix[3][3] = matrix[1][1], matrix[2][2], matrix[3][3], matrix[0][0]
+    matrix[0][3], matrix[1][2], matrix[2][1], matrix[3][0] = matrix[1][2], matrix[2][1], matrix[3][0], matrix[0][3]
 
 def playfairAlgorithmEncrypt(bigram, matrix, playfairMap):
     retFirst = 0
@@ -171,6 +247,20 @@ def generateMatrixFrom64Bit(byte: bytes):
 
     return np.array(matrix, np.int32)
 
+def generate64BitFromMatrix(matrix):
+    byte = 0
+    ret = bytearray()
+
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            if j % 2 == 0:
+                byte = matrix[i][j] << 4
+            else:
+                byte |= matrix[i][j]
+                ret.append(byte)
+
+    return ret
+
 def split8BitTo4Bit(byte: int):
     first = byte >> 4
     second = (byte & 0x0F)
@@ -209,14 +299,30 @@ def AND(byte1: bytes, byte2: bytes):
 
 def main():
     inputString = "plaintext yang sangat panjang lo"
-    key = "MBCHc1RWuPJIDxn0"
+    keyEncrypt = "MBCHc1RWuPJIDxn0"
 
-    resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(key, "utf-8"))
-    resultDecrypt = decrypt(resultEncrpyt, bytes(key, "utf-8"))
+    resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(keyEncrypt, "utf-8"))
+    keyDecrypt = "MBCHc1RWuPJIDxn0"
+    resultDecrypt = decrypt(resultEncrpyt, bytes(keyDecrypt, "utf-8"))
 
     print(f"Encrypted Bytes = {resultEncrpyt}")
     print(f'Encrypted String = {resultEncrpyt.decode("utf-8", errors="replace")}')
     print(f"Decrypted Bytes = {resultDecrypt}")
+
+    # inputString = "plaintext yang k"
+    # keyEncrypt = "MBCHc1RWuPJIDxn0"
+
+    # resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(keyEncrypt, "utf-8"))
+
+    # print(f"Encrypted Bytes = {resultEncrpyt}")
+    # print(f'Encrypted String = {resultEncrpyt.decode("utf-8", errors="replace")}')
+
+    # inputString = "plaintext yang s"
+    # keyEncrypt = "MBCHc1RWuPJIDxn0"
+
+    # resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(keyEncrypt, "utf-8"))
+    # print(f"Encrypted Bytes = {resultEncrpyt}")
+    # print(f'Encrypted String = {resultEncrpyt.decode("utf-8", errors="replace")}')
 
 if __name__ == "__main__":
     main()
