@@ -1,0 +1,25 @@
+Setelah rancangan block cipher selesai diimplementasi dan diujicoba, selanjutnya anda sebarkan
+algoritma block cipher tersebut dalam bentuk makalah. Makalah ditulis dalam Bahasa Indonesia
+atau Bahasa Inggris. Isi makalah adalah sebagai berikut:
+1. Pendahuluan
+Berisi latar belakang, masalah, dan related works (mengacu pada referensi/paper)
+2. Studi Pustaka/Dasar Teori
+Berisi konsep/teori yang digunakan di dalam block cipher yang anda buat. Tidak usah
+berpanjang-panjang dan menyita banyak halaman
+3. Rancangan Block Cipher (Proposed Method)
+Berisi rincian algoritma enkripsi dan dekripsi, termasuk skema, diagram, tabel, dll.
+4. Eksperimen dan Pembahasan Hasil
+Berisi hasil uji enkripsi dan dekripsi dan menganalisis hasil-hasilnya, meliputi:
+-Waktu enkripsi dan dekripsi untuk pesan dengan ukuran beragam (small, medium,
+large, very large)
+-Analisis efek longsoran (avalanche effect), yaitu bagaimana perubahan cipherteks
+jika satu bit atau satu byte plainteks atau kunci diubah
+-Analisis ruang kunci (key space)
+-Analisis keamanan lainnya
+5. Kesimpulan dan Saran
+Berisi konklusi dari hasil-hasil yang sudah diperoleh dan saran pengembangan (future
+works).
+6. Daftar referensi
+Berisi semua referensi yang digunakan di dalam makalah
+Jumlah halaman makalah tidak dibatasi, namun jangan terlalu singkat karena tidak
+menggambarkan keseluruhan hasil penelitian.

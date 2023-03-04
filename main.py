@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import time
 
 def encrypt(plaintext: bytes, key: bytes):
     if (len(key) != 16):
@@ -8,6 +9,7 @@ def encrypt(plaintext: bytes, key: bytes):
     if (len(plaintext) % 16 != 0):
         raise(Exception("Plaintext length has to be multiple of 128 bit (16 bytes)"))
     
+    start = time.time()
     ciphertext = bytearray()
     blocks = splitBytesIntoBlocks(plaintext)
 
@@ -31,6 +33,9 @@ def encrypt(plaintext: bytes, key: bytes):
 
         ciphertext.extend(blockBytes)
 
+    end = time.time()
+    print(f"Encryption Elapsed Time = {end- start} s")
+
     return ciphertext
 
 def decrypt(ciphertext: bytes, key: bytes):
@@ -40,6 +45,7 @@ def decrypt(ciphertext: bytes, key: bytes):
     if (len(ciphertext) % 16 != 0):
         raise(Exception("Ciphertext length has to be multiple of 128 bit (16 bytes)"))
     
+    start = time.time()
     plaintext = bytearray()
     blocks = splitBytesIntoBlocks(ciphertext)
     
@@ -63,6 +69,8 @@ def decrypt(ciphertext: bytes, key: bytes):
         
         plaintext.extend(blockBytes)
 
+    end = time.time()
+    print(f"Decryption Elapsed Time = {end- start} s")
     return plaintext
 
 def cipherFunctionEncrypt(byte, roundKey):
@@ -298,31 +306,29 @@ def AND(byte1: bytes, byte2: bytes):
     return bytes(a & b for a, b in zip(byte1, byte2))
 
 def main():
-    inputString = "plaintext yang sangat panjang lo"
-    keyEncrypt = "MBCHc1RWuPJIDxn0"
+    inputString = """davidkarelhalomo"""
 
+    keyEncrypt = "MBCHc1RWuPJIDxn0"
     resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(keyEncrypt, "utf-8"))
+    # print(f"Encrypted Bytes = {resultEncrpyt}")
+    print()
+
     keyDecrypt = "MBCHc1RWuPJIDxn0"
     resultDecrypt = decrypt(resultEncrpyt, bytes(keyDecrypt, "utf-8"))
-
-    print(f"Encrypted Bytes = {resultEncrpyt}")
-    print(f'Encrypted String = {resultEncrpyt.decode("utf-8", errors="replace")}')
     print(f"Decrypted Bytes = {resultDecrypt}")
 
-    # inputString = "plaintext yang k"
-    # keyEncrypt = "MBCHc1RWuPJIDxn0"
-
-    # resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(keyEncrypt, "utf-8"))
-
-    # print(f"Encrypted Bytes = {resultEncrpyt}")
     # print(f'Encrypted String = {resultEncrpyt.decode("utf-8", errors="replace")}')
-
-    # inputString = "plaintext yang s"
+    # inputString = "davidkarelhalomo"
     # keyEncrypt = "MBCHc1RWuPJIDxn0"
 
     # resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(keyEncrypt, "utf-8"))
     # print(f"Encrypted Bytes = {resultEncrpyt}")
-    # print(f'Encrypted String = {resultEncrpyt.decode("utf-8", errors="replace")}')
+
+    # inputString = "davidkarelhalomo"
+    # keyEncrypt = "MBCHc1RVuPJIDxn0"
+
+    # resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(keyEncrypt, "utf-8"))
+    # print(f"Encrypted Bytes = {resultEncrpyt}")
 
 if __name__ == "__main__":
     main()
