@@ -4,9 +4,11 @@ import time
 
 def encrypt(plaintext: bytes, key: bytes):
     if (len(key) != 16):
+        print(f"\nKey Length = {len(key)} bytes\n")
         raise(Exception("Key length has to be 128 bit (16 bytes)"))
     
     if (len(plaintext) % 16 != 0):
+        print(f"\nPlaintext Length = {len(plaintext)} bytes\n")
         raise(Exception("Plaintext length has to be multiple of 128 bit (16 bytes)"))
     
     start = time.time()
@@ -40,9 +42,11 @@ def encrypt(plaintext: bytes, key: bytes):
 
 def decrypt(ciphertext: bytes, key: bytes):
     if (len(key) != 16):
+        print(f"\nKey Length = {len(plaintext)} bytes\n")
         raise(Exception("Key length has to be 128 bit (16 bytes)"))
 
     if (len(ciphertext) % 16 != 0):
+        print(f"\nCiphertext Length = {len(ciphertext)} bytes\n")
         raise(Exception("Ciphertext length has to be multiple of 128 bit (16 bytes)"))
     
     start = time.time()
@@ -306,18 +310,30 @@ def AND(byte1: bytes, byte2: bytes):
     return bytes(a & b for a, b in zip(byte1, byte2))
 
 def main():
-    inputString = """davidkarelhalomo"""
+    # ENCRYPTION AND DECRYPTION TESTING
+    inputString = """Kami bangsa Indonesia dengan ini menjatakan Kemerdekaan Indonesia.
+
+Hal-hal jang mengenai pemindahan kekoeasaan d.l.l., diselenggarakan dengan tjara seksama dan dalam tempo jang sesingkat-singkatnja.
+
+Djakarta, hari 17 boelan 8 tahoen 05
+
+Atas nama bangsa Indonesia
+
+Soekarno/Hatta.------"""
 
     keyEncrypt = "MBCHc1RWuPJIDxn0"
     resultEncrpyt = encrypt(bytes(inputString, "utf-8"), bytes(keyEncrypt, "utf-8"))
-    # print(f"Encrypted Bytes = {resultEncrpyt}")
+
+    print(f"Encrypted Bytes = {resultEncrpyt}")
+    print(f'Encrypted String = {resultEncrpyt.decode("utf-8", errors="replace")}')
     print()
 
     keyDecrypt = "MBCHc1RWuPJIDxn0"
     resultDecrypt = decrypt(resultEncrpyt, bytes(keyDecrypt, "utf-8"))
     print(f"Decrypted Bytes = {resultDecrypt}")
 
-    # print(f'Encrypted String = {resultEncrpyt.decode("utf-8", errors="replace")}')
+
+    # DIFFUSION TESTING (CHANGE ONE BIT IN KEY OR PLAINTEXT)
     # inputString = "davidkarelhalomo"
     # keyEncrypt = "MBCHc1RWuPJIDxn0"
 
